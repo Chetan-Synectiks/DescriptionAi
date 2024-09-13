@@ -1,19 +1,22 @@
-from flask import Flask, request, jsonify
-import google.generativeai as genai
+# src/app.py
+
 from dotenv import load_dotenv
 import os
+import google.generativeai as genai
 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables from the .env file located in the root directory
+load_dotenv(dotenv_path="../.env")
 
-# Initialize the Flask app
-app = Flask(__name__)
+# Retrieve the API key from the environment variables
+api_key = os.getenv("API_KEY")
+
+if not api_key:
+    raise Exception("API Key not found. Please set it in the .env file.")
 
 # Configure the API key for Google Generative AI
-api_key = os.getenv("API_KEY")
 genai.configure(api_key=api_key)
 
-# Function to generate response from the Google Generative AI
+# Function to generate a response from the Google Generative AI
 def generate_response(prompt):
     try:
         model = genai.GenerativeModel('gemini-1.0-pro-latest')
@@ -23,13 +26,9 @@ def generate_response(prompt):
     except Exception as e:
         return f"Error generating response: {str(e)}"
 
-# Define a route for the API
-@app.route('/generate', methods=['POST'])
-def generate():
-    data = request.json
-    prompt = data.get('prompt', 'Give me a short description for resume that is ATS-friendly')
-    response = generate_response(prompt)
-    return jsonify({"response": response})
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+# Example usage (you can modify this to handle web requests, etc.)
+if __name__ == "__main__":
+    promptraw = input("Enter your prompt: ")
+    prompt = promptraw + ", Give me a short description for resume that is ATS-friendly"
+    response_text = generate_response(prompt)
+    print(f"Response: {response_text}")
